@@ -7,11 +7,15 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <StartupObject>AutoKeyLight.Program</StartupObject>
-    <ApplicationIcon>Pixelkit-Swanky-Outlines-15-Light-Bulb.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\Icon.ico</ApplicationIcon>
     <Company>$(AssemblyName)</Company>
-    <PackageIcon>Pixelkit-Swanky-Outlines-15-Light-Bulb-1.png</PackageIcon>
+    <PackageIcon>TrayIconUnlit.png</PackageIcon>
     <Authors>Gabriel Garcia</Authors>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Icon.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
@@ -34,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Pixelkit-Swanky-Outlines-15-Light-Bulb-1.png">
+    <None Update="Resources\TrayIconUnlit.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

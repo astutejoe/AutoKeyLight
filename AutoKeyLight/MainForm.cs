@@ -13,12 +13,17 @@ namespace AutoKeyLight
         string keylightURL = $"http://{Properties.Settings.Default.IP}:9123/elgato/lights";
         CancellationTokenSource requestStateTokenSource;
         CancellationToken requestStateToken;
+        System.Drawing.Icon TrayIconUnlit;
+        System.Drawing.Icon TrayIconLit;
 
         public MainForm()
         {
             InitializeComponent();
             requestStateTokenSource = new CancellationTokenSource();
             requestStateToken = requestStateTokenSource.Token;
+
+            TrayIconLit = Icon.FromHandle(Properties.Resources.TrayIconLit.GetHicon());
+            TrayIconUnlit = Icon.FromHandle(Properties.Resources.TrayIconUnlit.GetHicon());
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -26,6 +31,8 @@ namespace AutoKeyLight
             RefreshCameraState();
             tmrCameraCheck_Tick(null, null);
             txtIP.Text = Properties.Settings.Default.IP;
+            niTray.Icon = TrayIconUnlit;
+            this.Icon = Properties.Resources.Icon;
         }
 
         private async void RefreshCameraState()
@@ -63,6 +70,7 @@ namespace AutoKeyLight
 
             lblCameraState.Text = "Camera is ON";
             lblCameraState.ForeColor = Color.LawnGreen;
+            niTray.Icon = TrayIconLit;
 
             if (!isCameraOn)
             {
@@ -74,6 +82,7 @@ namespace AutoKeyLight
         private void CameraIsOff()
         {
             RefreshCameraState();
+            niTray.Icon = TrayIconUnlit;
 
             lblCameraState.Text = "Camera is OFF";
             lblCameraState.ForeColor = Color.IndianRed;
