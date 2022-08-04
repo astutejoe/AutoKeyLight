@@ -75,7 +75,10 @@ namespace AutoKeyLight
             if (!isCameraOn)
             {
                 StringContent httpContent = new StringContent("{\"lights\": [{\"on\": 1}]}", Encoding.UTF8, "application/json");
-                httpClient.PutAsync(keylightURL, httpContent).Wait();
+                try
+                {
+                    httpClient.PutAsync(keylightURL, httpContent).Wait();
+                } catch { }
             }
         }
 
@@ -90,7 +93,11 @@ namespace AutoKeyLight
             if (isCameraOn)
             {
                 StringContent httpContent = new StringContent("{\"lights\": [{\"on\": 0}]}", Encoding.UTF8, "application/json");
-                httpClient.PutAsync(keylightURL, httpContent).Wait();
+                try
+                {
+                    httpClient.PutAsync(keylightURL, httpContent).Wait();
+                }
+                catch { }
             }
         }
 
