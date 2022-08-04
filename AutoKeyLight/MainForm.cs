@@ -29,7 +29,7 @@ namespace AutoKeyLight
         private void MainForm_Load(object sender, EventArgs e)
         {
             RefreshCameraState();
-            tmrCameraCheck_Tick(null, null);
+            tmrCameraCheck_Tick(sender, e);
             txtIP.Text = Properties.Settings.Default.IP;
             niTray.Icon = TrayIconUnlit;
             this.Icon = Properties.Resources.Icon;
@@ -43,10 +43,34 @@ namespace AutoKeyLight
 
                 if (response.IsSuccessStatusCode)
                 {
-                    JsonNode responseRoot = JsonNode.Parse(await  response.Content.ReadAsStringAsync(requestStateToken));
-                    isCameraOn = (responseRoot.AsObject()["lights"].AsArray()[0].AsObject()["on"].GetValue<int>() == 1);
-                    lblLightState.Text = isCameraOn ? "Light is ON" : "Light is OFF";
-                    lblLightState.ForeColor = isCameraOn ? Color.LawnGreen : Color.IndianRed;
+                    bool success = false;
+
+                    JsonNode? responseRoot = JsonNode.Parse(await response.Content.ReadAsStringAsync(requestStateToken));
+                    if (responseRoot != null)
+                    {
+                        JsonNode? lightsArray = responseRoot.AsObject()["lights"];
+                        if (lightsArray != null)
+                        {
+                            JsonNode? lightObject = lightsArray.AsArray()[0];
+                            if (lightObject != null)
+                            {
+                                JsonNode? onProperty = lightObject.AsObject()["on"];
+                                if (onProperty != null)
+                                {
+                                    isCameraOn = onProperty.GetValue<int>() == 1;
+                                    lblLightState.Text = isCameraOn ? "Light is ON" : "Light is OFF";
+                                    lblLightState.ForeColor = isCameraOn ? Color.LawnGreen : Color.IndianRed;
+                                    success = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!success)
+                    {
+                        lblLightState.Text = "Malformed JSON please\ncreate an Issue on GitHub";
+                        lblLightState.ForeColor = Color.Red;
+                    }
                 }
                 else
                 {
@@ -112,7 +136,12 @@ namespace AutoKeyLight
 
             foreach (string key in packagedKeys)
             {
-                Int64? timestamp = (Int64?)webcamAppsKey.OpenSubKey(key).GetValue("LastUsedTimeStop");
+                RegistryKey? subKey = webcamAppsKey.OpenSubKey(key);
+
+                if (subKey == null)
+                    continue;
+
+                Int64? timestamp = (Int64?)subKey.GetValue("LastUsedTimeStop");
 
                 if (timestamp != null && timestamp == 0)
                 {
@@ -128,7 +157,12 @@ namespace AutoKeyLight
 
                 foreach (string key in nonPackagedKeys)
                 {
-                    Int64? timestamp = (Int64?)nonPackagedKey.OpenSubKey(key).GetValue("LastUsedTimeStop");
+                    RegistryKey? subKey = nonPackagedKey.OpenSubKey(key);
+
+                    if (subKey == null)
+                        continue;
+
+                    Int64? timestamp = (Int64?)subKey.GetValue("LastUsedTimeStop");
 
                     if (timestamp != null && timestamp == 0)
                     {
@@ -153,6 +187,9 @@ namespace AutoKeyLight
 
         private void chkStartWithWindows_CheckedChanged(object sender, EventArgs e)
         {
+            if (startWithWindowsRegistry == null)
+                return;
+
             if (chkStartWithWindows.Checked)
                 startWithWindowsRegistry.SetValue("MyApp", Application.ExecutablePath);
             else
@@ -176,7 +213,7 @@ namespace AutoKeyLight
 
         private void MainForm_Shown(object sender, EventArgs e)
         {
-            chkStartWithWindows.Checked = startWithWindowsRegistry.GetValue("MyApp") != null;
+            chkStartWithWindows.Checked = startWithWindowsRegistry != null && startWithWindowsRegistry.GetValue("MyApp") != null;
 
             if (chkStartWithWindows.Checked)
                 this.Hide();
