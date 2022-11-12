@@ -1,5 +1,5 @@
 # AutoKeyLight
-Automatically turns on and off your Elgato Key Light when you turn on your webcam.
+Automatically turns on and off your Elgato lights when you turn on and off your webcam.
 
 ![image](https://user-images.githubusercontent.com/15985195/201465765-105bb629-f124-449f-b946-a6f8cd6eb5ed.png)
 
