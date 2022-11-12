@@ -2,7 +2,7 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="AutoKeyLight.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="IP" Type="System.String" Scope="User">
+    <Setting Name="IPs" Type="System.Collections.Specialized.StringCollection" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

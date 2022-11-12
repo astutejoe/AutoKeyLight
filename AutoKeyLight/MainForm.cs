@@ -1,6 +1,8 @@
 using Microsoft.Win32;
+using System.Collections.Specialized;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Xml;
 
 namespace AutoKeyLight
 {
@@ -10,11 +12,10 @@ namespace AutoKeyLight
         const string webcamRegistryKey = @"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam";
         RegistryKey? startWithWindowsRegistry = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
         bool isCameraOn = false;
-        string keylightURL = $"http://{Properties.Settings.Default.IP}:9123/elgato/lights";
         CancellationTokenSource requestStateTokenSource;
         CancellationToken requestStateToken;
-        System.Drawing.Icon TrayIconUnlit;
-        System.Drawing.Icon TrayIconLit;
+        Icon TrayIconUnlit;
+        Icon TrayIconLit;
 
         public MainForm()
         {
@@ -26,65 +27,164 @@ namespace AutoKeyLight
             TrayIconUnlit = Icon.FromHandle(Properties.Resources.TrayIconUnlit.GetHicon());
         }
 
+        public static string? ShowDialog(string text, string caption)
+        {
+            Form prompt = new Form()
+            {
+                Width = 300,
+                Height = 150,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                Text = caption,
+                StartPosition = FormStartPosition.CenterScreen
+            };
+            Label textLabel = new Label() { Left = 50, Top = 20, Text = text };
+            TextBox textBox = new TextBox() { Left = 50, Top = 50, Width = 200 };
+            Button confirmation = new Button() { Text = "Ok", Left = 50, Width = 60, Top = 80, DialogResult = DialogResult.OK };
+            Button cancel = new Button() { Text = "Cancel", Left = 110, Width = 60, Top = 80, DialogResult = DialogResult.Cancel };
+            confirmation.Click += (sender, e) => { prompt.Close(); };
+            cancel.Click += (sender, e) => { textBox.Text = null; prompt.Close(); };
+            prompt.Controls.Add(textBox);
+            prompt.Controls.Add(confirmation);
+            prompt.Controls.Add(textLabel);
+            prompt.Controls.Add(cancel);
+            prompt.AcceptButton = confirmation;
+
+            return prompt.ShowDialog() == DialogResult.OK ? textBox.Text.Trim() : null;
+        }
+
+        void ReloadLights()
+        {
+            lbIPs.Items.Clear();
+            lbIPs.ClearSelected();
+            btnRemoveLight.Enabled = false;
+
+            if (Properties.Settings.Default.IPs != null)
+            {
+                foreach (string? IP in Properties.Settings.Default.IPs)
+                {
+                    if (IP != null)
+                        lbIPs.Items.Add(IP);
+                }
+            }
+            else
+            {
+                Properties.Settings.Default.IPs = new StringCollection();
+            }
+        }
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             RefreshCameraState();
             tmrCameraCheck_Tick(sender, e);
-            txtIP.Text = Properties.Settings.Default.IP;
+
+            ReloadLights();
+
+            string elgatoSettingsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Elgato", "ControlCenter", "Settings.xml");
+
+            try
+            {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(elgatoSettingsFile);
+
+                foreach (XmlNode outterNode in doc.ChildNodes)
+                {
+                    if (outterNode.Name == "AppSettings")
+                    {
+                        foreach (XmlNode node in outterNode.ChildNodes)
+                        {
+                            if (node.Name == "Application")
+                            {
+                                foreach (XmlNode innerNode in node.ChildNodes)
+                                {
+                                    if (innerNode.Name == "Accessories")
+                                    {
+                                        foreach (XmlNode accessoryNode in innerNode.ChildNodes)
+                                        {
+                                            foreach (XmlNode attribute in accessoryNode.ChildNodes)
+                                            {
+                                                if (attribute.Name == "IpAddress")
+                                                {
+                                                    if (!lbIPs.Items.Contains(attribute.InnerText.Trim()))
+                                                    {
+                                                        lbIPs.Items.Add(attribute.InnerText.Trim());
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            catch (FileNotFoundException) { }
+
             niTray.Icon = TrayIconUnlit;
-            this.Icon = Properties.Resources.Icon;
+            Icon = Properties.Resources.Icon;
         }
 
         private async void RefreshCameraState()
         {
-            try
+            lblError.Visible = false;
+
+            foreach (string IP in lbIPs.Items)
             {
-                HttpResponseMessage response = await httpClient.GetAsync(keylightURL, requestStateToken);
-
-                if (response.IsSuccessStatusCode)
+                try
                 {
-                    bool success = false;
+                    string keylightURL = $"http://{IP}:9123/elgato/lights";
 
-                    JsonNode? responseRoot = JsonNode.Parse(await response.Content.ReadAsStringAsync(requestStateToken));
-                    if (responseRoot != null)
+                    HttpResponseMessage response = await httpClient.GetAsync(keylightURL, requestStateToken);
+
+                    if (response.IsSuccessStatusCode)
                     {
-                        JsonNode? lightsArray = responseRoot.AsObject()["lights"];
-                        if (lightsArray != null)
+                        bool success = false;
+
+                        JsonNode? responseRoot = JsonNode.Parse(await response.Content.ReadAsStringAsync(requestStateToken));
+                        if (responseRoot != null)
                         {
-                            JsonNode? lightObject = lightsArray.AsArray()[0];
-                            if (lightObject != null)
+                            JsonNode? lightsArray = responseRoot.AsObject()["lights"];
+                            if (lightsArray != null)
                             {
-                                JsonNode? onProperty = lightObject.AsObject()["on"];
-                                if (onProperty != null)
+                                JsonNode? lightObject = lightsArray.AsArray()[0];
+                                if (lightObject != null)
                                 {
-                                    isCameraOn = onProperty.GetValue<int>() == 1;
-                                    lblLightState.Text = isCameraOn ? "Light is ON" : "Light is OFF";
-                                    lblLightState.ForeColor = isCameraOn ? Color.LawnGreen : Color.IndianRed;
-                                    success = true;
+                                    JsonNode? onProperty = lightObject.AsObject()["on"];
+                                    if (onProperty != null)
+                                    {
+                                        isCameraOn = onProperty.GetValue<int>() == 1;
+                                        lblLightState.Text = isCameraOn ? "Lights are ON" : "Lights are OFF";
+                                        lblLightState.ForeColor = isCameraOn ? Color.LawnGreen : Color.IndianRed;
+                                        success = true;
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if (!success)
+                        if (!success)
+                        {
+                            lblError.Visible = true;
+                            lblError.Text = "Malformed JSON please\ncreate an Issue on GitHub";
+                        }
+                    }
+                    else
                     {
-                        lblLightState.Text = "Malformed JSON please\ncreate an Issue on GitHub";
-                        lblLightState.ForeColor = Color.Red;
+                        lblError.Visible = true;
+                        lblLightState.Text = $"Error, check IP: {IP}";
                     }
                 }
-                else
+                catch
                 {
-                    lblLightState.Text = "Error, check IP";
-                    lblLightState.ForeColor = Color.Red;
-                }
-            }
-            catch
-            {
-                lblLightState.Text = "Error, check IP";
-                lblLightState.ForeColor = Color.Red;
+                    lblError.Visible = true;
+                    lblError.Text = $"Error, check IP: {IP}";
 
-                requestStateTokenSource = new CancellationTokenSource();
-                requestStateToken = requestStateTokenSource.Token;
+                    requestStateTokenSource = new CancellationTokenSource();
+                    requestStateToken = requestStateTokenSource.Token;
+                }
             }
         }
 
@@ -98,11 +198,16 @@ namespace AutoKeyLight
 
             if (!isCameraOn)
             {
-                StringContent httpContent = new StringContent("{\"lights\": [{\"on\": 1}]}", Encoding.UTF8, "application/json");
-                try
+                foreach (string IP in lbIPs.Items)
                 {
-                    httpClient.PutAsync(keylightURL, httpContent).Wait();
-                } catch { }
+                    string keylightURL = $"http://{IP}:9123/elgato/lights";
+                    StringContent httpContent = new StringContent("{\"lights\": [{\"on\": 1}]}", Encoding.UTF8, "application/json");
+                    try
+                    {
+                        httpClient.PutAsync(keylightURL, httpContent).Wait();
+                    }
+                    catch { }
+                }
             }
         }
 
@@ -116,12 +221,17 @@ namespace AutoKeyLight
 
             if (isCameraOn)
             {
-                StringContent httpContent = new StringContent("{\"lights\": [{\"on\": 0}]}", Encoding.UTF8, "application/json");
-                try
+                foreach (string IP in lbIPs.Items)
                 {
-                    httpClient.PutAsync(keylightURL, httpContent).Wait();
+                    string keylightURL = $"http://{IP}:9123/elgato/lights";
+                    StringContent httpContent = new StringContent("{\"lights\": [{\"on\": 0}]}", Encoding.UTF8, "application/json");
+
+                    try
+                    {
+                        httpClient.PutAsync(keylightURL, httpContent).Wait();
+                    }
+                    catch { }
                 }
-                catch { }
             }
         }
 
@@ -175,16 +285,6 @@ namespace AutoKeyLight
             CameraIsOff();
         }
 
-        private void txtIP_TextChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.IP = txtIP.Text;
-            Properties.Settings.Default.Save();
-
-            keylightURL = $"http://{txtIP.Text}:9123/elgato/lights";
-
-            requestStateTokenSource.Cancel();
-        }
-
         private void chkStartWithWindows_CheckedChanged(object sender, EventArgs e)
         {
             if (startWithWindowsRegistry == null)
@@ -227,9 +327,37 @@ namespace AutoKeyLight
                     Application.Exit();
                     break;
                 case "tsmiOpen":
-                    this.Show();
+                    Show();
                     break;
             }
+        }
+
+        private void btnAddLight_Click(object sender, EventArgs e)
+        {
+            string? newIP = ShowDialog("Light IP", "New Light");
+
+            if (!string.IsNullOrEmpty(newIP))
+            {
+                Properties.Settings.Default.IPs.Add(newIP);
+                Properties.Settings.Default.Save();
+                ReloadLights();
+            }
+        }
+
+        private void btnRemoveLight_Click(object sender, EventArgs e)
+        {
+            if (lbIPs.SelectedIndex >= 0)
+            {
+                Properties.Settings.Default.IPs.Remove((string)lbIPs.SelectedItem);
+                Properties.Settings.Default.Save();
+
+                ReloadLights();
+            }
+        }
+
+        private void lbIPs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btnRemoveLight.Enabled = lbIPs.SelectedIndex >= 0;
         }
     }
 }

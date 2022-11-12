@@ -31,14 +31,16 @@
             this.components = new System.ComponentModel.Container();
             this.tmrCameraCheck = new System.Windows.Forms.Timer(this.components);
             this.lblCameraState = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.txtIP = new System.Windows.Forms.TextBox();
             this.lblLightState = new System.Windows.Forms.Label();
             this.chkStartWithWindows = new System.Windows.Forms.CheckBox();
             this.niTray = new System.Windows.Forms.NotifyIcon(this.components);
             this.cmsTray = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tsmiOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiExit = new System.Windows.Forms.ToolStripMenuItem();
+            this.lbIPs = new System.Windows.Forms.ListBox();
+            this.btnAddLight = new System.Windows.Forms.Button();
+            this.btnRemoveLight = new System.Windows.Forms.Button();
+            this.lblError = new System.Windows.Forms.Label();
             this.cmsTray.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -51,49 +53,27 @@
             // lblCameraState
             // 
             this.lblCameraState.AutoSize = true;
-            this.lblCameraState.Location = new System.Drawing.Point(17, 93);
-            this.lblCameraState.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCameraState.Location = new System.Drawing.Point(12, 144);
             this.lblCameraState.Name = "lblCameraState";
-            this.lblCameraState.Size = new System.Drawing.Size(121, 25);
+            this.lblCameraState.Size = new System.Drawing.Size(80, 15);
             this.lblCameraState.TabIndex = 0;
             this.lblCameraState.Text = "Camera is ON";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(17, 25);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(104, 25);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Key Light IP";
-            // 
-            // txtIP
-            // 
-            this.txtIP.Location = new System.Drawing.Point(124, 20);
-            this.txtIP.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.txtIP.Name = "txtIP";
-            this.txtIP.Size = new System.Drawing.Size(125, 31);
-            this.txtIP.TabIndex = 3;
-            this.txtIP.TextChanged += new System.EventHandler(this.txtIP_TextChanged);
             // 
             // lblLightState
             // 
             this.lblLightState.AutoSize = true;
-            this.lblLightState.Location = new System.Drawing.Point(17, 155);
-            this.lblLightState.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblLightState.Location = new System.Drawing.Point(12, 166);
             this.lblLightState.Name = "lblLightState";
-            this.lblLightState.Size = new System.Drawing.Size(100, 25);
+            this.lblLightState.Size = new System.Drawing.Size(79, 15);
             this.lblLightState.TabIndex = 4;
-            this.lblLightState.Text = "Light is ON";
+            this.lblLightState.Text = "Lights are ON";
             // 
             // chkStartWithWindows
             // 
             this.chkStartWithWindows.AutoSize = true;
-            this.chkStartWithWindows.Location = new System.Drawing.Point(17, 217);
-            this.chkStartWithWindows.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.chkStartWithWindows.Location = new System.Drawing.Point(12, 218);
             this.chkStartWithWindows.Name = "chkStartWithWindows";
-            this.chkStartWithWindows.Size = new System.Drawing.Size(191, 29);
+            this.chkStartWithWindows.Size = new System.Drawing.Size(128, 19);
             this.chkStartWithWindows.TabIndex = 5;
             this.chkStartWithWindows.Text = "Start with Windows";
             this.chkStartWithWindows.UseVisualStyleBackColor = true;
@@ -113,33 +93,76 @@
             this.tsmiOpen,
             this.tsmiExit});
             this.cmsTray.Name = "cmsTray";
-            this.cmsTray.Size = new System.Drawing.Size(129, 68);
+            this.cmsTray.Size = new System.Drawing.Size(104, 48);
             this.cmsTray.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.cmsTray_ItemClicked);
             // 
             // tsmiOpen
             // 
             this.tsmiOpen.Name = "tsmiOpen";
-            this.tsmiOpen.Size = new System.Drawing.Size(128, 32);
+            this.tsmiOpen.Size = new System.Drawing.Size(103, 22);
             this.tsmiOpen.Text = "Open";
             // 
             // tsmiExit
             // 
             this.tsmiExit.Name = "tsmiExit";
-            this.tsmiExit.Size = new System.Drawing.Size(128, 32);
+            this.tsmiExit.Size = new System.Drawing.Size(103, 22);
             this.tsmiExit.Text = "Exit";
+            // 
+            // lbIPs
+            // 
+            this.lbIPs.FormattingEnabled = true;
+            this.lbIPs.ItemHeight = 15;
+            this.lbIPs.Location = new System.Drawing.Point(12, 12);
+            this.lbIPs.Name = "lbIPs";
+            this.lbIPs.Size = new System.Drawing.Size(156, 94);
+            this.lbIPs.TabIndex = 6;
+            this.lbIPs.SelectedIndexChanged += new System.EventHandler(this.lbIPs_SelectedIndexChanged);
+            // 
+            // btnAddLight
+            // 
+            this.btnAddLight.Location = new System.Drawing.Point(12, 112);
+            this.btnAddLight.Name = "btnAddLight";
+            this.btnAddLight.Size = new System.Drawing.Size(75, 23);
+            this.btnAddLight.TabIndex = 7;
+            this.btnAddLight.Text = "Add";
+            this.btnAddLight.UseVisualStyleBackColor = true;
+            this.btnAddLight.Click += new System.EventHandler(this.btnAddLight_Click);
+            // 
+            // btnRemoveLight
+            // 
+            this.btnRemoveLight.Enabled = false;
+            this.btnRemoveLight.Location = new System.Drawing.Point(93, 112);
+            this.btnRemoveLight.Name = "btnRemoveLight";
+            this.btnRemoveLight.Size = new System.Drawing.Size(75, 23);
+            this.btnRemoveLight.TabIndex = 8;
+            this.btnRemoveLight.Text = "Remove";
+            this.btnRemoveLight.UseVisualStyleBackColor = true;
+            this.btnRemoveLight.Click += new System.EventHandler(this.btnRemoveLight_Click);
+            // 
+            // lblError
+            // 
+            this.lblError.AutoSize = true;
+            this.lblError.ForeColor = System.Drawing.Color.LightCoral;
+            this.lblError.Location = new System.Drawing.Point(12, 189);
+            this.lblError.Name = "lblError";
+            this.lblError.Size = new System.Drawing.Size(37, 15);
+            this.lblError.TabIndex = 9;
+            this.lblError.Text = "Errors";
+            this.lblError.Visible = false;
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(263, 268);
+            this.ClientSize = new System.Drawing.Size(184, 248);
+            this.Controls.Add(this.lblError);
+            this.Controls.Add(this.btnRemoveLight);
+            this.Controls.Add(this.btnAddLight);
+            this.Controls.Add(this.lbIPs);
             this.Controls.Add(this.chkStartWithWindows);
             this.Controls.Add(this.lblLightState);
-            this.Controls.Add(this.txtIP);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.lblCameraState);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "MainForm";
@@ -157,13 +180,15 @@
 
         private System.Windows.Forms.Timer tmrCameraCheck;
         private Label lblCameraState;
-        private Label label1;
-        private TextBox txtIP;
         private Label lblLightState;
         private CheckBox chkStartWithWindows;
         private NotifyIcon niTray;
         private ContextMenuStrip cmsTray;
         private ToolStripMenuItem tsmiOpen;
         private ToolStripMenuItem tsmiExit;
+        private ListBox lbIPs;
+        private Button btnAddLight;
+        private Button btnRemoveLight;
+        private Label lblError;
     }
 }
