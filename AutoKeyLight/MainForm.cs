@@ -123,6 +123,7 @@ namespace AutoKeyLight
                 }
             }
             catch (FileNotFoundException) { }
+            catch (DirectoryNotFoundException) { }
 
             niTray.Icon = TrayIconUnlit;
             Icon = Properties.Resources.Icon;
