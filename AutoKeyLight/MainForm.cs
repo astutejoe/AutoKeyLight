@@ -74,7 +74,7 @@ namespace AutoKeyLight
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            RefreshCameraState();
+            RefreshCamerasState();
             tmrCameraCheck_Tick(sender, e);
 
             ReloadLights();
@@ -129,69 +129,74 @@ namespace AutoKeyLight
             Icon = Properties.Resources.Icon;
         }
 
-        private async void RefreshCameraState()
+        private void RefreshCamerasState()
+        {
+            foreach (string IP in lbIPs.Items)
+            {
+                RefreshCameraState(IP);
+            }
+        }
+
+        private async void RefreshCameraState( string IP )
         {
             lblError.Visible = false;
 
-            foreach (string IP in lbIPs.Items)
+            try
             {
-                try
+                string keylightURL = $"http://{IP}:9123/elgato/lights";
+
+                HttpResponseMessage response = await httpClient.GetAsync(keylightURL, requestStateToken);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    string keylightURL = $"http://{IP}:9123/elgato/lights";
+                    bool success = false;
 
-                    HttpResponseMessage response = await httpClient.GetAsync(keylightURL, requestStateToken);
-
-                    if (response.IsSuccessStatusCode)
+                    JsonNode? responseRoot = JsonNode.Parse(await response.Content.ReadAsStringAsync(requestStateToken));
+                    if (responseRoot != null)
                     {
-                        bool success = false;
-
-                        JsonNode? responseRoot = JsonNode.Parse(await response.Content.ReadAsStringAsync(requestStateToken));
-                        if (responseRoot != null)
+                        JsonNode? lightsArray = responseRoot.AsObject()["lights"];
+                        if (lightsArray != null)
                         {
-                            JsonNode? lightsArray = responseRoot.AsObject()["lights"];
-                            if (lightsArray != null)
+                            JsonNode? lightObject = lightsArray.AsArray()[0];
+                            if (lightObject != null)
                             {
-                                JsonNode? lightObject = lightsArray.AsArray()[0];
-                                if (lightObject != null)
+                                JsonNode? onProperty = lightObject.AsObject()["on"];
+                                if (onProperty != null)
                                 {
-                                    JsonNode? onProperty = lightObject.AsObject()["on"];
-                                    if (onProperty != null)
-                                    {
-                                        isCameraOn = onProperty.GetValue<int>() == 1;
-                                        lblLightState.Text = isCameraOn ? "Lights are ON" : "Lights are OFF";
-                                        lblLightState.ForeColor = isCameraOn ? Color.LawnGreen : Color.IndianRed;
-                                        success = true;
-                                    }
+                                    isCameraOn = onProperty.GetValue<int>() == 1;
+                                    lblLightState.Text = isCameraOn ? "Lights are ON" : "Lights are OFF";
+                                    lblLightState.ForeColor = isCameraOn ? Color.LawnGreen : Color.IndianRed;
+                                    success = true;
                                 }
                             }
                         }
-
-                        if (!success)
-                        {
-                            lblError.Visible = true;
-                            lblError.Text = "Malformed JSON please\ncreate an Issue on GitHub";
-                        }
                     }
-                    else
+
+                    if (!success)
                     {
                         lblError.Visible = true;
-                        lblLightState.Text = $"Error, check IP: {IP}";
+                        lblError.Text = "Malformed JSON please\ncreate an Issue on GitHub";
                     }
                 }
-                catch
+                else
                 {
                     lblError.Visible = true;
-                    lblError.Text = $"Error, check IP: {IP}";
-
-                    requestStateTokenSource = new CancellationTokenSource();
-                    requestStateToken = requestStateTokenSource.Token;
+                    lblLightState.Text = $"Error, check IP: {IP}";
                 }
+            }
+            catch
+            {
+                lblError.Visible = true;
+                lblError.Text = $"Error, check IP: {IP}";
+
+                requestStateTokenSource = new CancellationTokenSource();
+                requestStateToken = requestStateTokenSource.Token;
             }
         }
 
         private void CameraIsOn()
         {
-            RefreshCameraState();
+            RefreshCamerasState();
 
             lblCameraState.Text = "Camera is ON";
             lblCameraState.ForeColor = Color.LawnGreen;
@@ -214,7 +219,7 @@ namespace AutoKeyLight
 
         private void CameraIsOff()
         {
-            RefreshCameraState();
+            RefreshCamerasState();
             niTray.Icon = TrayIconUnlit;
 
             lblCameraState.Text = "Camera is OFF";

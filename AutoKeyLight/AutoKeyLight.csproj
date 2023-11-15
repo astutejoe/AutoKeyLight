@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,11 +11,9 @@
     <PackageIcon>TrayIconUnlit.png</PackageIcon>
     <Authors>Gabriel Garcia</Authors>
   </PropertyGroup>
-
   <ItemGroup>
     <Content Include="Resources\Icon.ico" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -29,14 +26,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
   <ItemGroup>
     <None Update="Resources\TrayIconUnlit.png">
       <Pack>True</Pack>
@@ -47,5 +42,4 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-
 </Project>

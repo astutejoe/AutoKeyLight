@@ -1,9 +1,9 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoKeyLight", "AutoKeyLight\AutoKeyLight.csproj", "{EFEF84FA-A98D-4C5A-B8BE-DDE4772D6CBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoKeyLight", "AutoKeyLight\AutoKeyLight.csproj", "{EFEF84FA-A98D-4C5A-B8BE-DDE4772D6CBE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
