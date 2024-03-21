@@ -210,7 +210,7 @@ namespace AutoKeyLight
                     StringContent httpContent = new StringContent("{\"lights\": [{\"on\": 1}]}", Encoding.UTF8, "application/json");
                     try
                     {
-                        httpClient.PutAsync(keylightURL, httpContent).Wait();
+                        httpClient.PutAsync(keylightURL, httpContent);
                     }
                     catch { }
                 }
@@ -234,7 +234,7 @@ namespace AutoKeyLight
 
                     try
                     {
-                        httpClient.PutAsync(keylightURL, httpContent).Wait();
+                        httpClient.PutAsync(keylightURL, httpContent);
                     }
                     catch { }
                 }
