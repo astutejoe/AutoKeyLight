@@ -28,151 +28,173 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.tmrCameraCheck = new System.Windows.Forms.Timer(this.components);
-            this.lblCameraState = new System.Windows.Forms.Label();
-            this.lblLightState = new System.Windows.Forms.Label();
-            this.chkStartWithWindows = new System.Windows.Forms.CheckBox();
-            this.niTray = new System.Windows.Forms.NotifyIcon(this.components);
-            this.cmsTray = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.tsmiOpen = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiExit = new System.Windows.Forms.ToolStripMenuItem();
-            this.lbIPs = new System.Windows.Forms.ListBox();
-            this.btnAddLight = new System.Windows.Forms.Button();
-            this.btnRemoveLight = new System.Windows.Forms.Button();
-            this.lblError = new System.Windows.Forms.Label();
-            this.cmsTray.SuspendLayout();
-            this.SuspendLayout();
+            components = new System.ComponentModel.Container();
+            tmrCameraCheck = new System.Windows.Forms.Timer(components);
+            lblCameraState = new Label();
+            lblLightState = new Label();
+            chkStartWithWindows = new CheckBox();
+            niTray = new NotifyIcon(components);
+            cmsTray = new ContextMenuStrip(components);
+            tsmiOpen = new ToolStripMenuItem();
+            tsmiExit = new ToolStripMenuItem();
+            lbIPs = new ListBox();
+            btnAddLight = new Button();
+            btnRemoveLight = new Button();
+            lblError = new Label();
+            numUpDown = new NumericUpDown();
+            lblDelay = new Label();
+            cmsTray.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)numUpDown).BeginInit();
+            SuspendLayout();
             // 
             // tmrCameraCheck
             // 
-            this.tmrCameraCheck.Enabled = true;
-            this.tmrCameraCheck.Interval = 1000;
-            this.tmrCameraCheck.Tick += new System.EventHandler(this.tmrCameraCheck_Tick);
+            tmrCameraCheck.Enabled = true;
+            tmrCameraCheck.Interval = 1000;
+            tmrCameraCheck.Tick += tmrCameraCheck_Tick;
             // 
             // lblCameraState
             // 
-            this.lblCameraState.AutoSize = true;
-            this.lblCameraState.Location = new System.Drawing.Point(12, 144);
-            this.lblCameraState.Name = "lblCameraState";
-            this.lblCameraState.Size = new System.Drawing.Size(80, 15);
-            this.lblCameraState.TabIndex = 0;
-            this.lblCameraState.Text = "Camera is ON";
+            lblCameraState.AutoSize = true;
+            lblCameraState.Location = new Point(12, 144);
+            lblCameraState.Name = "lblCameraState";
+            lblCameraState.Size = new Size(80, 15);
+            lblCameraState.TabIndex = 0;
+            lblCameraState.Text = "Camera is ON";
             // 
             // lblLightState
             // 
-            this.lblLightState.AutoSize = true;
-            this.lblLightState.Location = new System.Drawing.Point(12, 166);
-            this.lblLightState.Name = "lblLightState";
-            this.lblLightState.Size = new System.Drawing.Size(79, 15);
-            this.lblLightState.TabIndex = 4;
-            this.lblLightState.Text = "Lights are ON";
+            lblLightState.AutoSize = true;
+            lblLightState.Location = new Point(12, 166);
+            lblLightState.Name = "lblLightState";
+            lblLightState.Size = new Size(79, 15);
+            lblLightState.TabIndex = 4;
+            lblLightState.Text = "Lights are ON";
             // 
             // chkStartWithWindows
             // 
-            this.chkStartWithWindows.AutoSize = true;
-            this.chkStartWithWindows.Location = new System.Drawing.Point(12, 218);
-            this.chkStartWithWindows.Name = "chkStartWithWindows";
-            this.chkStartWithWindows.Size = new System.Drawing.Size(128, 19);
-            this.chkStartWithWindows.TabIndex = 5;
-            this.chkStartWithWindows.Text = "Start with Windows";
-            this.chkStartWithWindows.UseVisualStyleBackColor = true;
-            this.chkStartWithWindows.CheckedChanged += new System.EventHandler(this.chkStartWithWindows_CheckedChanged);
+            chkStartWithWindows.AutoSize = true;
+            chkStartWithWindows.Location = new Point(12, 237);
+            chkStartWithWindows.Name = "chkStartWithWindows";
+            chkStartWithWindows.Size = new Size(128, 19);
+            chkStartWithWindows.TabIndex = 5;
+            chkStartWithWindows.Text = "Start with Windows";
+            chkStartWithWindows.UseVisualStyleBackColor = true;
+            chkStartWithWindows.CheckedChanged += chkStartWithWindows_CheckedChanged;
             // 
             // niTray
             // 
-            this.niTray.ContextMenuStrip = this.cmsTray;
-            this.niTray.Text = "Auto Key Light";
-            this.niTray.Visible = true;
-            this.niTray.DoubleClick += new System.EventHandler(this.niTray_DoubleClick);
+            niTray.ContextMenuStrip = cmsTray;
+            niTray.Text = "Auto Key Light";
+            niTray.Visible = true;
+            niTray.DoubleClick += niTray_DoubleClick;
             // 
             // cmsTray
             // 
-            this.cmsTray.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.cmsTray.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsmiOpen,
-            this.tsmiExit});
-            this.cmsTray.Name = "cmsTray";
-            this.cmsTray.Size = new System.Drawing.Size(104, 48);
-            this.cmsTray.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.cmsTray_ItemClicked);
+            cmsTray.ImageScalingSize = new Size(24, 24);
+            cmsTray.Items.AddRange(new ToolStripItem[] { tsmiOpen, tsmiExit });
+            cmsTray.Name = "cmsTray";
+            cmsTray.Size = new Size(104, 48);
+            cmsTray.ItemClicked += cmsTray_ItemClicked;
             // 
             // tsmiOpen
             // 
-            this.tsmiOpen.Name = "tsmiOpen";
-            this.tsmiOpen.Size = new System.Drawing.Size(103, 22);
-            this.tsmiOpen.Text = "Open";
+            tsmiOpen.Name = "tsmiOpen";
+            tsmiOpen.Size = new Size(103, 22);
+            tsmiOpen.Text = "Open";
             // 
             // tsmiExit
             // 
-            this.tsmiExit.Name = "tsmiExit";
-            this.tsmiExit.Size = new System.Drawing.Size(103, 22);
-            this.tsmiExit.Text = "Exit";
+            tsmiExit.Name = "tsmiExit";
+            tsmiExit.Size = new Size(103, 22);
+            tsmiExit.Text = "Exit";
             // 
             // lbIPs
             // 
-            this.lbIPs.FormattingEnabled = true;
-            this.lbIPs.ItemHeight = 15;
-            this.lbIPs.Location = new System.Drawing.Point(12, 12);
-            this.lbIPs.Name = "lbIPs";
-            this.lbIPs.Size = new System.Drawing.Size(156, 94);
-            this.lbIPs.TabIndex = 6;
-            this.lbIPs.SelectedIndexChanged += new System.EventHandler(this.lbIPs_SelectedIndexChanged);
+            lbIPs.FormattingEnabled = true;
+            lbIPs.ItemHeight = 15;
+            lbIPs.Location = new Point(12, 12);
+            lbIPs.Name = "lbIPs";
+            lbIPs.Size = new Size(156, 94);
+            lbIPs.TabIndex = 6;
+            lbIPs.SelectedIndexChanged += lbIPs_SelectedIndexChanged;
             // 
             // btnAddLight
             // 
-            this.btnAddLight.Location = new System.Drawing.Point(12, 112);
-            this.btnAddLight.Name = "btnAddLight";
-            this.btnAddLight.Size = new System.Drawing.Size(75, 23);
-            this.btnAddLight.TabIndex = 7;
-            this.btnAddLight.Text = "Add";
-            this.btnAddLight.UseVisualStyleBackColor = true;
-            this.btnAddLight.Click += new System.EventHandler(this.btnAddLight_Click);
+            btnAddLight.Location = new Point(12, 112);
+            btnAddLight.Name = "btnAddLight";
+            btnAddLight.Size = new Size(75, 23);
+            btnAddLight.TabIndex = 7;
+            btnAddLight.Text = "Add";
+            btnAddLight.UseVisualStyleBackColor = true;
+            btnAddLight.Click += btnAddLight_Click;
             // 
             // btnRemoveLight
             // 
-            this.btnRemoveLight.Enabled = false;
-            this.btnRemoveLight.Location = new System.Drawing.Point(93, 112);
-            this.btnRemoveLight.Name = "btnRemoveLight";
-            this.btnRemoveLight.Size = new System.Drawing.Size(75, 23);
-            this.btnRemoveLight.TabIndex = 8;
-            this.btnRemoveLight.Text = "Remove";
-            this.btnRemoveLight.UseVisualStyleBackColor = true;
-            this.btnRemoveLight.Click += new System.EventHandler(this.btnRemoveLight_Click);
+            btnRemoveLight.Enabled = false;
+            btnRemoveLight.Location = new Point(93, 112);
+            btnRemoveLight.Name = "btnRemoveLight";
+            btnRemoveLight.Size = new Size(75, 23);
+            btnRemoveLight.TabIndex = 8;
+            btnRemoveLight.Text = "Remove";
+            btnRemoveLight.UseVisualStyleBackColor = true;
+            btnRemoveLight.Click += btnRemoveLight_Click;
             // 
             // lblError
             // 
-            this.lblError.AutoSize = true;
-            this.lblError.ForeColor = System.Drawing.Color.LightCoral;
-            this.lblError.Location = new System.Drawing.Point(12, 189);
-            this.lblError.Name = "lblError";
-            this.lblError.Size = new System.Drawing.Size(37, 15);
-            this.lblError.TabIndex = 9;
-            this.lblError.Text = "Errors";
-            this.lblError.Visible = false;
+            lblError.AutoSize = true;
+            lblError.ForeColor = Color.LightCoral;
+            lblError.Location = new Point(12, 188);
+            lblError.Name = "lblError";
+            lblError.Size = new Size(37, 15);
+            lblError.TabIndex = 9;
+            lblError.Text = "Errors";
+            lblError.Visible = false;
+            // 
+            // numUpDown
+            // 
+            numUpDown.Location = new Point(81, 208);
+            numUpDown.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
+            numUpDown.Name = "numUpDown";
+            numUpDown.Size = new Size(73, 23);
+            numUpDown.TabIndex = 10;
+            numUpDown.ValueChanged += numUpDown_ValueChanged;
+            // 
+            // lblDelay
+            // 
+            lblDelay.AutoSize = true;
+            lblDelay.Location = new Point(12, 210);
+            lblDelay.Name = "lblDelay";
+            lblDelay.Size = new Size(63, 15);
+            lblDelay.TabIndex = 11;
+            lblDelay.Text = "Delay (ms)";
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(184, 248);
-            this.Controls.Add(this.lblError);
-            this.Controls.Add(this.btnRemoveLight);
-            this.Controls.Add(this.btnAddLight);
-            this.Controls.Add(this.lbIPs);
-            this.Controls.Add(this.chkStartWithWindows);
-            this.Controls.Add(this.lblLightState);
-            this.Controls.Add(this.lblCameraState);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "MainForm";
-            this.Text = "Auto Key Light";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            this.Load += new System.EventHandler(this.MainForm_Load);
-            this.Shown += new System.EventHandler(this.MainForm_Shown);
-            this.cmsTray.ResumeLayout(false);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(184, 267);
+            Controls.Add(lblDelay);
+            Controls.Add(numUpDown);
+            Controls.Add(lblError);
+            Controls.Add(btnRemoveLight);
+            Controls.Add(btnAddLight);
+            Controls.Add(lbIPs);
+            Controls.Add(chkStartWithWindows);
+            Controls.Add(lblLightState);
+            Controls.Add(lblCameraState);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "MainForm";
+            Text = "Auto Key Light";
+            FormClosing += MainForm_FormClosing;
+            Load += MainForm_Load;
+            Shown += MainForm_Shown;
+            cmsTray.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)numUpDown).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
 
         }
 
@@ -190,5 +212,7 @@
         private Button btnAddLight;
         private Button btnRemoveLight;
         private Label lblError;
+        private NumericUpDown numUpDown;
+        private Label lblDelay;
     }
 }

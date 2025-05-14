@@ -11,11 +11,16 @@ namespace AutoKeyLight
         private readonly HttpClient httpClient = new HttpClient();
         const string webcamRegistryKey = @"Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\webcam";
         RegistryKey? startWithWindowsRegistry = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+        bool areLightsOn = false;
         bool isCameraOn = false;
         CancellationTokenSource requestStateTokenSource;
         CancellationToken requestStateToken;
         Icon TrayIconUnlit;
         Icon TrayIconLit;
+        DateTime cameraOnTime = DateTime.UtcNow;
+        DateTime cameraOffTime = DateTime.UtcNow;
+        decimal cameraDelay = Decimal.Zero;
+        DateTime lastAPICall = DateTime.UtcNow;
 
         public MainForm()
         {
@@ -74,10 +79,12 @@ namespace AutoKeyLight
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            RefreshCamerasState();
+            RefreshLightsState();
             tmrCameraCheck_Tick(sender, e);
 
             ReloadLights();
+
+            numUpDown.Value = cameraDelay = Properties.Settings.Default.CameraDelay;
 
             string elgatoSettingsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Elgato", "ControlCenter", "Settings.xml");
 
@@ -129,15 +136,15 @@ namespace AutoKeyLight
             Icon = Properties.Resources.Icon;
         }
 
-        private void RefreshCamerasState()
+        private void RefreshLightsState()
         {
             foreach (string IP in lbIPs.Items)
             {
-                RefreshCameraState(IP);
+                RefreshLightState(IP);
             }
         }
 
-        private async void RefreshCameraState( string IP )
+        private async void RefreshLightState(string IP)
         {
             lblError.Visible = false;
 
@@ -163,9 +170,9 @@ namespace AutoKeyLight
                                 JsonNode? onProperty = lightObject.AsObject()["on"];
                                 if (onProperty != null)
                                 {
-                                    isCameraOn = onProperty.GetValue<int>() == 1;
-                                    lblLightState.Text = isCameraOn ? "Lights are ON" : "Lights are OFF";
-                                    lblLightState.ForeColor = isCameraOn ? Color.LawnGreen : Color.IndianRed;
+                                    areLightsOn = onProperty.GetValue<int>() == 1;
+                                    lblLightState.Text = areLightsOn ? "Lights are ON" : "Lights are OFF";
+                                    lblLightState.ForeColor = areLightsOn ? Color.LawnGreen : Color.IndianRed;
                                     success = true;
                                 }
                             }
@@ -194,9 +201,28 @@ namespace AutoKeyLight
             }
         }
 
+        private void ToggleLight(string IP, bool turnOn)
+        {
+            string keylightURL = $"http://{IP}:9123/elgato/lights";
+            StringContent httpContent = new StringContent("{\"lights\": [{\"on\": " + (turnOn ? "1" : "0") + "}]}", Encoding.UTF8, "application/json");
+            try
+            {
+                httpClient.PutAsync(keylightURL, httpContent);
+            }
+            catch { }
+        }
+
+        private void ToggleLights(bool turnOn)
+        {
+            foreach (string IP in lbIPs.Items)
+            {
+                ToggleLight(IP, turnOn);
+            }
+        }
+
         private void CameraIsOn()
         {
-            RefreshCamerasState();
+            RefreshLightsState();
 
             lblCameraState.Text = "Camera is ON";
             lblCameraState.ForeColor = Color.LawnGreen;
@@ -204,22 +230,22 @@ namespace AutoKeyLight
 
             if (!isCameraOn)
             {
-                foreach (string IP in lbIPs.Items)
-                {
-                    string keylightURL = $"http://{IP}:9123/elgato/lights";
-                    StringContent httpContent = new StringContent("{\"lights\": [{\"on\": 1}]}", Encoding.UTF8, "application/json");
-                    try
-                    {
-                        httpClient.PutAsync(keylightURL, httpContent);
-                    }
-                    catch { }
-                }
+                cameraOnTime = DateTime.UtcNow;
+                isCameraOn = true;
             }
+
+            if (cameraOnTime.AddMilliseconds(Decimal.ToDouble(cameraDelay)) > DateTime.UtcNow)
+                return;
+
+            if (lastAPICall.AddSeconds(1) > DateTime.UtcNow)
+                return;
+
+            ToggleLights(true);
         }
 
         private void CameraIsOff()
         {
-            RefreshCamerasState();
+            RefreshLightsState();
             niTray.Icon = TrayIconUnlit;
 
             lblCameraState.Text = "Camera is OFF";
@@ -227,18 +253,17 @@ namespace AutoKeyLight
 
             if (isCameraOn)
             {
-                foreach (string IP in lbIPs.Items)
-                {
-                    string keylightURL = $"http://{IP}:9123/elgato/lights";
-                    StringContent httpContent = new StringContent("{\"lights\": [{\"on\": 0}]}", Encoding.UTF8, "application/json");
-
-                    try
-                    {
-                        httpClient.PutAsync(keylightURL, httpContent);
-                    }
-                    catch { }
-                }
+                cameraOffTime = DateTime.UtcNow;
+                isCameraOn = false;
             }
+
+            if (cameraOffTime.AddMilliseconds(Decimal.ToDouble(cameraDelay)) > DateTime.UtcNow)
+                return;
+
+            if (lastAPICall.AddSeconds(1) > DateTime.UtcNow)
+                return;
+
+            ToggleLights(false);
         }
 
         private void tmrCameraCheck_Tick(object sender, EventArgs e)
@@ -364,6 +389,13 @@ namespace AutoKeyLight
         private void lbIPs_SelectedIndexChanged(object sender, EventArgs e)
         {
             btnRemoveLight.Enabled = lbIPs.SelectedIndex >= 0;
+        }
+
+        private void numUpDown_ValueChanged(object sender, EventArgs e)
+        {
+            cameraDelay = numUpDown.Value;
+            Properties.Settings.Default.CameraDelay = cameraDelay;
+            Properties.Settings.Default.Save();
         }
     }
 }
