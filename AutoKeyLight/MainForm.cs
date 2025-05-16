@@ -354,6 +354,9 @@ namespace AutoKeyLight
 
         private void cmsTray_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
+            if (e.ClickedItem == null)
+                return;
+
             switch (e.ClickedItem.Name)
             {
                 case "tsmiExit":
@@ -381,7 +384,7 @@ namespace AutoKeyLight
         {
             if (lbIPs.SelectedIndex >= 0)
             {
-                Properties.Settings.Default.IPs.Remove((string)lbIPs.SelectedItem);
+                Properties.Settings.Default.IPs.Remove((string?)lbIPs.SelectedItem);
                 Properties.Settings.Default.Save();
 
                 ReloadLights();
