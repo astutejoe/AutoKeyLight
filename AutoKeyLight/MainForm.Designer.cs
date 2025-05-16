@@ -43,8 +43,11 @@
             lblError = new Label();
             numUpDown = new NumericUpDown();
             lblDelay = new Label();
+            lblOffDelay = new Label();
+            numUpDownOff = new NumericUpDown();
             cmsTray.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numUpDown).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numUpDownOff).BeginInit();
             SuspendLayout();
             // 
             // tmrCameraCheck
@@ -74,7 +77,7 @@
             // chkStartWithWindows
             // 
             chkStartWithWindows.AutoSize = true;
-            chkStartWithWindows.Location = new Point(12, 237);
+            chkStartWithWindows.Location = new Point(12, 269);
             chkStartWithWindows.Name = "chkStartWithWindows";
             chkStartWithWindows.Size = new Size(128, 19);
             chkStartWithWindows.TabIndex = 5;
@@ -153,7 +156,7 @@
             // 
             // numUpDown
             // 
-            numUpDown.Location = new Point(81, 208);
+            numUpDown.Location = new Point(100, 208);
             numUpDown.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
             numUpDown.Name = "numUpDown";
             numUpDown.Size = new Size(73, 23);
@@ -165,15 +168,35 @@
             lblDelay.AutoSize = true;
             lblDelay.Location = new Point(12, 210);
             lblDelay.Name = "lblDelay";
-            lblDelay.Size = new Size(63, 15);
+            lblDelay.Size = new Size(82, 15);
             lblDelay.TabIndex = 11;
-            lblDelay.Text = "Delay (ms)";
+            lblDelay.Text = "On Delay (ms)";
+            // 
+            // lblOffDelay
+            // 
+            lblOffDelay.AutoSize = true;
+            lblOffDelay.Location = new Point(12, 242);
+            lblOffDelay.Name = "lblOffDelay";
+            lblOffDelay.Size = new Size(83, 15);
+            lblOffDelay.TabIndex = 13;
+            lblOffDelay.Text = "Off Delay (ms)";
+            // 
+            // numUpDownOff
+            // 
+            numUpDownOff.Location = new Point(100, 240);
+            numUpDownOff.Maximum = new decimal(new int[] { 10000, 0, 0, 0 });
+            numUpDownOff.Name = "numUpDownOff";
+            numUpDownOff.Size = new Size(73, 23);
+            numUpDownOff.TabIndex = 12;
+            numUpDownOff.ValueChanged += numUpDownOff_ValueChanged;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(184, 267);
+            ClientSize = new Size(184, 300);
+            Controls.Add(lblOffDelay);
+            Controls.Add(numUpDownOff);
             Controls.Add(lblDelay);
             Controls.Add(numUpDown);
             Controls.Add(lblError);
@@ -193,6 +216,7 @@
             Shown += MainForm_Shown;
             cmsTray.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)numUpDown).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numUpDownOff).EndInit();
             ResumeLayout(false);
             PerformLayout();
 
@@ -214,5 +238,7 @@
         private Label lblError;
         private NumericUpDown numUpDown;
         private Label lblDelay;
+        private Label lblOffDelay;
+        private NumericUpDown numUpDownOff;
     }
 }

@@ -19,7 +19,8 @@ namespace AutoKeyLight
         Icon TrayIconLit;
         DateTime cameraOnTime = DateTime.UtcNow;
         DateTime cameraOffTime = DateTime.UtcNow;
-        decimal cameraDelay = Decimal.Zero;
+        decimal cameraOnDelay = Decimal.Zero;
+        decimal cameraOffDelay = Decimal.Zero;
         DateTime lastAPICall = DateTime.UtcNow;
 
         public MainForm()
@@ -84,7 +85,8 @@ namespace AutoKeyLight
 
             ReloadLights();
 
-            numUpDown.Value = cameraDelay = Properties.Settings.Default.CameraDelay;
+            numUpDown.Value = cameraOnDelay = Properties.Settings.Default.CameraDelay;
+            numUpDownOff.Value = cameraOffDelay = Properties.Settings.Default.CameraOffDelay;
 
             string elgatoSettingsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Elgato", "ControlCenter", "Settings.xml");
 
@@ -234,7 +236,7 @@ namespace AutoKeyLight
                 isCameraOn = true;
             }
 
-            if (cameraOnTime.AddMilliseconds(Decimal.ToDouble(cameraDelay)) > DateTime.UtcNow)
+            if (cameraOnTime.AddMilliseconds(Decimal.ToDouble(cameraOnDelay)) > DateTime.UtcNow)
                 return;
 
             if (lastAPICall.AddSeconds(1) > DateTime.UtcNow)
@@ -257,7 +259,7 @@ namespace AutoKeyLight
                 isCameraOn = false;
             }
 
-            if (cameraOffTime.AddMilliseconds(Decimal.ToDouble(cameraDelay)) > DateTime.UtcNow)
+            if (cameraOffTime.AddMilliseconds(Decimal.ToDouble(cameraOffDelay)) > DateTime.UtcNow)
                 return;
 
             if (lastAPICall.AddSeconds(1) > DateTime.UtcNow)
@@ -393,8 +395,15 @@ namespace AutoKeyLight
 
         private void numUpDown_ValueChanged(object sender, EventArgs e)
         {
-            cameraDelay = numUpDown.Value;
-            Properties.Settings.Default.CameraDelay = cameraDelay;
+            cameraOnDelay = numUpDown.Value;
+            Properties.Settings.Default.CameraDelay = cameraOnDelay;
+            Properties.Settings.Default.Save();
+        }
+
+        private void numUpDownOff_ValueChanged(object sender, EventArgs e)
+        {
+            cameraOffDelay = numUpDownOff.Value;
+            Properties.Settings.Default.CameraOffDelay = cameraOffDelay;
             Properties.Settings.Default.Save();
         }
     }

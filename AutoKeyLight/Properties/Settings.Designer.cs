@@ -45,5 +45,17 @@ namespace AutoKeyLight.Properties {
                 this["CameraDelay"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public decimal CameraOffDelay {
+            get {
+                return ((decimal)(this["CameraOffDelay"]));
+            }
+            set {
+                this["CameraOffDelay"] = value;
+            }
+        }
     }
 }
