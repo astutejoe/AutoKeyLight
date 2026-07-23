@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Xml;
+using static System.Windows.Forms.AxHost;
 
 namespace AutoKeyLight
 {
@@ -146,13 +147,25 @@ namespace AutoKeyLight
             }
         }
 
+        public string FigureOutIPAndPort(string IP)
+        {
+            //If it has : it means there's a port specified, do not add it
+            if ( IP.Contains(':') )
+            {
+                return IP;
+            }
+
+            //Else append the default port
+            return $"{IP}:9123";
+        }
+
         private async void RefreshLightState(string IP)
         {
             lblError.Visible = false;
 
             try
             {
-                string keylightURL = $"http://{IP}:9123/elgato/lights";
+                string keylightURL = $"http://{FigureOutIPAndPort(IP)}/elgato/lights";
 
                 HttpResponseMessage response = await httpClient.GetAsync(keylightURL, requestStateToken);
 
@@ -203,13 +216,18 @@ namespace AutoKeyLight
             }
         }
 
-        private void ToggleLight(string IP, bool turnOn)
+        private async void ToggleLight(string IP, bool turnOn)
         {
-            string keylightURL = $"http://{IP}:9123/elgato/lights";
-            StringContent httpContent = new StringContent("{\"lights\": [{\"on\": " + (turnOn ? "1" : "0") + "}]}", Encoding.UTF8, "application/json");
+            string keylightURL = $"http://{FigureOutIPAndPort(IP)}/elgato/lights";
+
+            int onState = turnOn ? 1 : 0;
+
+            string jsonPayload = $"{{\"numberOfLights\": 1, \"lights\": [{{\"on\": {onState}}}]}}";
+
+            StringContent httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
             try
             {
-                httpClient.PutAsync(keylightURL, httpContent);
+                await httpClient.PutAsync(keylightURL, httpContent);
             }
             catch { }
         }
