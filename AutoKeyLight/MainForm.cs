@@ -23,6 +23,7 @@ namespace AutoKeyLight
         decimal cameraOnDelay = Decimal.Zero;
         decimal cameraOffDelay = Decimal.Zero;
         DateTime lastAPICall = DateTime.UtcNow;
+        CameraActivityMonitor? cameraActivityMonitor = CameraActivityMonitor.TryCreate();
 
         public MainForm()
         {
@@ -288,6 +289,16 @@ namespace AutoKeyLight
 
         private void tmrCameraCheck_Tick(object sender, EventArgs e)
         {
+            if (cameraActivityMonitor != null)
+            {
+                if (cameraActivityMonitor.IsCameraStreaming)
+                    CameraIsOn();
+                else
+                    CameraIsOff();
+
+                return;
+            }
+
             RegistryKey? webcamAppsKey = Registry.CurrentUser.OpenSubKey(webcamRegistryKey);
 
             if (webcamAppsKey == null)
@@ -354,7 +365,11 @@ namespace AutoKeyLight
                 niTray.Visible = true;
                 this.Hide();
                 e.Cancel = true;
+                return;
             }
+
+            cameraActivityMonitor?.Dispose();
+            cameraActivityMonitor = null;
         }
 
         private void niTray_DoubleClick(object sender, EventArgs e)
