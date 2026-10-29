@@ -33,6 +33,7 @@
             lblCameraState = new Label();
             lblLightState = new Label();
             chkStartWithWindows = new CheckBox();
+            chkAllowManualOverride = new CheckBox();
             niTray = new NotifyIcon(components);
             cmsTray = new ContextMenuStrip(components);
             tsmiOpen = new ToolStripMenuItem();
@@ -84,6 +85,17 @@
             chkStartWithWindows.Text = "Start with Windows";
             chkStartWithWindows.UseVisualStyleBackColor = true;
             chkStartWithWindows.CheckedChanged += chkStartWithWindows_CheckedChanged;
+            // 
+            // chkAllowManualOverride
+            // 
+            chkAllowManualOverride.AutoSize = true;
+            chkAllowManualOverride.Location = new Point(12, 294);
+            chkAllowManualOverride.Name = "chkAllowManualOverride";
+            chkAllowManualOverride.Size = new Size(148, 19);
+            chkAllowManualOverride.TabIndex = 14;
+            chkAllowManualOverride.Text = "Allow manual override";
+            chkAllowManualOverride.UseVisualStyleBackColor = true;
+            chkAllowManualOverride.CheckedChanged += chkAllowManualOverride_CheckedChanged;
             // 
             // niTray
             // 
@@ -194,7 +206,8 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(184, 300);
+            ClientSize = new Size(184, 325);
+            Controls.Add(chkAllowManualOverride);
             Controls.Add(lblOffDelay);
             Controls.Add(numUpDownOff);
             Controls.Add(lblDelay);
@@ -228,6 +241,7 @@
         private Label lblCameraState;
         private Label lblLightState;
         private CheckBox chkStartWithWindows;
+        private CheckBox chkAllowManualOverride;
         private NotifyIcon niTray;
         private ContextMenuStrip cmsTray;
         private ToolStripMenuItem tsmiOpen;

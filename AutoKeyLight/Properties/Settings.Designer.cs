@@ -57,5 +57,17 @@ namespace AutoKeyLight.Properties {
                 this["CameraOffDelay"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AllowManualOverride {
+            get {
+                return ((bool)(this["AllowManualOverride"]));
+            }
+            set {
+                this["AllowManualOverride"] = value;
+            }
+        }
     }
 }

@@ -18,11 +18,12 @@ namespace AutoKeyLight
         CancellationToken requestStateToken;
         Icon TrayIconUnlit;
         Icon TrayIconLit;
-        DateTime cameraOnTime = DateTime.UtcNow;
-        DateTime cameraOffTime = DateTime.UtcNow;
+        DateTime cameraStateChangeTime = DateTime.UtcNow;
         decimal cameraOnDelay = Decimal.Zero;
         decimal cameraOffDelay = Decimal.Zero;
-        DateTime lastAPICall = DateTime.UtcNow;
+        // Camera state the lights were last switched for, starts as off so the lights are only touched once the camera turns on
+        bool lightsCameraState = false;
+        bool isTogglingLights = false;
         CameraActivityMonitor? cameraActivityMonitor = CameraActivityMonitor.TryCreate();
 
         public MainForm()
@@ -82,6 +83,8 @@ namespace AutoKeyLight
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            chkAllowManualOverride.Checked = Properties.Settings.Default.AllowManualOverride;
+
             RefreshLightsState();
             tmrCameraCheck_Tick(sender, e);
 
@@ -217,7 +220,7 @@ namespace AutoKeyLight
             }
         }
 
-        private async void ToggleLight(string IP, bool turnOn)
+        private async Task<bool> ToggleLight(string IP, bool turnOn)
         {
             string keylightURL = $"http://{FigureOutIPAndPort(IP)}/elgato/lights";
 
@@ -228,17 +231,26 @@ namespace AutoKeyLight
             StringContent httpContent = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
             try
             {
-                await httpClient.PutAsync(keylightURL, httpContent);
+                HttpResponseMessage response = await httpClient.PutAsync(keylightURL, httpContent);
+                return response.IsSuccessStatusCode;
             }
-            catch { }
+            catch
+            {
+                return false;
+            }
         }
 
-        private void ToggleLights(bool turnOn)
+        private async void ToggleLights(bool turnOn)
         {
-            foreach (string IP in lbIPs.Items)
-            {
-                ToggleLight(IP, turnOn);
-            }
+            isTogglingLights = true;
+
+            bool[] results = await Task.WhenAll(lbIPs.Items.Cast<string>().Select(IP => ToggleLight(IP, turnOn)));
+
+            isTogglingLights = false;
+
+            //If any light didn't respond, leave the state unhandled so it's retried on the next tick
+            if (results.All(success => success))
+                lightsCameraState = turnOn;
         }
 
         private void CameraIsOn()
@@ -249,19 +261,7 @@ namespace AutoKeyLight
             lblCameraState.ForeColor = Color.LawnGreen;
             niTray.Icon = TrayIconLit;
 
-            if (!isCameraOn)
-            {
-                cameraOnTime = DateTime.UtcNow;
-                isCameraOn = true;
-            }
-
-            if (cameraOnTime.AddMilliseconds(Decimal.ToDouble(cameraOnDelay)) > DateTime.UtcNow)
-                return;
-
-            if (lastAPICall.AddSeconds(1) > DateTime.UtcNow)
-                return;
-
-            ToggleLights(true);
+            UpdateCameraState(true);
         }
 
         private void CameraIsOff()
@@ -272,19 +272,30 @@ namespace AutoKeyLight
             lblCameraState.Text = "Camera is OFF";
             lblCameraState.ForeColor = Color.IndianRed;
 
-            if (isCameraOn)
+            UpdateCameraState(false);
+        }
+
+        private void UpdateCameraState(bool cameraOn)
+        {
+            if (isCameraOn != cameraOn)
             {
-                cameraOffTime = DateTime.UtcNow;
-                isCameraOn = false;
+                cameraStateChangeTime = DateTime.UtcNow;
+                isCameraOn = cameraOn;
             }
 
-            if (cameraOffTime.AddMilliseconds(Decimal.ToDouble(cameraOffDelay)) > DateTime.UtcNow)
+            if (isTogglingLights)
                 return;
 
-            if (lastAPICall.AddSeconds(1) > DateTime.UtcNow)
+            //With manual override, only switch the lights when the camera changes state, so lights turned on or off manually are left alone
+            if (Properties.Settings.Default.AllowManualOverride && isCameraOn == lightsCameraState)
                 return;
 
-            ToggleLights(false);
+            decimal delay = isCameraOn ? cameraOnDelay : cameraOffDelay;
+
+            if (cameraStateChangeTime.AddMilliseconds(Decimal.ToDouble(delay)) > DateTime.UtcNow)
+                return;
+
+            ToggleLights(isCameraOn);
         }
 
         private void tmrCameraCheck_Tick(object sender, EventArgs e)
@@ -440,6 +451,12 @@ namespace AutoKeyLight
         {
             cameraOffDelay = numUpDownOff.Value;
             Properties.Settings.Default.CameraOffDelay = cameraOffDelay;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkAllowManualOverride_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.AllowManualOverride = chkAllowManualOverride.Checked;
             Properties.Settings.Default.Save();
         }
     }
